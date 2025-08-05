@@ -1,0 +1,11 @@
+build*
+.atom-dbg.cson
+.vscode
+*~
+.goutputstream-*
+*.css
+
+# subprojects/*/
+.flatpak-builder
+.vscode
+.flatpak/meson.sh
