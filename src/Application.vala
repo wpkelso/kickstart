@@ -7,8 +7,6 @@
 const string APP_ID = "io.github.wpkelso.kickstart";
 
 public class Application : Gtk.Application {
-    
-    Gtk.EntryBuffer buf = new Gtk.EntryBuffer ();
 
     public Application () {
         Object (
@@ -51,26 +49,10 @@ public class Application : Gtk.Application {
     }
 
     protected override void activate () {
+        var app_window = new AppWindow ();
 
-        var entry = new Gtk.Entry.with_buffer (buf) {
-            primary_icon_name = "system-search-symbolic",
-            placeholder_text = "Search for something…",
-        };
-
-        var window = new Gtk.Window () {
-            child = entry,
-            default_width = 800,
-            titlebar = new Gtk.Grid (),
-        };
-
-        entry.activate.connect (on_filled_entry);
-
-        add_window (window);
-        window.present ();
-    }
-
-    public void on_filled_entry () {
-        debug ("Searching for: %s", buf.get_text ());
+        add_window (app_window);
+        app_window.present ();
     }
 
     public static int main (string[] args) {

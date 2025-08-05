@@ -1,3 +1,4 @@
 sources += files(
-  'Application.vala'
+  'Application.vala',
+  'Window.vala'
 )
