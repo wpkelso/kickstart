@@ -35,6 +35,7 @@ deps = [
     dependency('granite-7'),
     dependency('gtk4'),
     dependency('gio-2.0'),
+    dependency('gee-0.8'),
 ]
 
 executable(

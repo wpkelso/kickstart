@@ -8,6 +8,8 @@ const string APP_ID = "io.github.wpkelso.kickstart";
 
 public class Application : Gtk.Application {
 
+    private Backend.AppInfo app_backend;
+
     public Application () {
         Object (
                 application_id: APP_ID,
@@ -37,6 +39,9 @@ public class Application : Gtk.Application {
             );
         });
 
+        debug ("Initiating backends");
+        app_backend = new Backend.AppInfo ();
+
         SimpleAction quit_action = new SimpleAction ("quit", null);
         set_accels_for_action ("app.quit", {"<Control>q"});
         add_action (quit_action);
@@ -44,13 +49,13 @@ public class Application : Gtk.Application {
             foreach (var window in this.get_windows ()) {
                 window.close_request ();
             }
-            this.quit ();
+            release ();
+            quit ();
         });
     }
 
     protected override void activate () {
         var app_window = new AppWindow ();
-
         add_window (app_window);
         app_window.present ();
     }
