@@ -9,6 +9,8 @@ public class AppWindow : Gtk.Window {
     private Gtk.Paned paned;
     private Gtk.ListView results_list;
 
+    public Backend.AppInfo app_backend { get; set; default = null; }
+
     int interval = 1;
     uint debounce_timer_id = 0;
 
@@ -43,15 +45,33 @@ public class AppWindow : Gtk.Window {
             debounce_timer_id = 0;
             var target = buf.get_text ();
             debug ("Searching for: %s", target);
-        
-            if (target.length > 0) {
-                paned.set_end_child (new Gtk.Label ("Results for " + target + " will show up here…"));
-            } else {
-                paned.set_end_child (null);
-            }
+            queue_searches (target);
             
             return GLib.Source.REMOVE;
         });
+    }
+
+    private void queue_searches (string target) {
+            
+            var results_box = new Gtk.Box (VERTICAL, 0) {
+                vexpand = true,
+            };
+
+            var app_results = app_backend.simple_search (target);
+
+            if (target.length > 0) {
+                foreach (var result in app_results) {
+                    var new_box = new Gtk.Box (HORIZONTAL, 0) {
+                    hexpand=true,
+                    };
+                    new_box.append (new Gtk.Label (result.get_display_name ()));
+                    results_box.append (new_box);
+                }
+                paned.set_end_child (results_box);
+            } else {
+                paned.set_end_child (null);
+            }
+
     }
 
 }

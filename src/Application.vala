@@ -55,7 +55,9 @@ public class Application : Gtk.Application {
     }
 
     protected override void activate () {
-        var app_window = new AppWindow ();
+        var app_window = new AppWindow () {
+            app_backend = app_backend,
+        };
         add_window (app_window);
         app_window.present ();
     }

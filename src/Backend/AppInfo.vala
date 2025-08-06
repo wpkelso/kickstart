@@ -9,10 +9,11 @@ public class Backend.AppInfo : Object {
     private int interval = 5;
 
     private GLib.AppInfoMonitor app_monitor;
-    public Gee.HashMap<string, List<DesktopAppInfo>> apps { get; private set; default = null; }
+    public Gee.HashMap<string, GLib.AppInfo> apps { get; private set; default = null; }
 
     construct {
         debug ("Constructing app monitor backend");
+        apps = new Gee.HashMap<string, GLib.AppInfo> ();
         app_monitor = GLib.AppInfoMonitor.@get ();
         app_monitor.changed.connect (queue_app_list_update);
         update_app_list ();
@@ -36,7 +37,31 @@ public class Backend.AppInfo : Object {
         debug ("Updating app list!");
         var app_list = GLib.AppInfo.get_all ();
         foreach (var app in app_list) {
-            print ("%s\n", app.get_name ());
+            debug ("Found %s, adding to app list\n", app.get_id ());
+            apps.@set (app.get_id (), app);
         }
+    }
+
+    public Gee.HashSet<GLib.AppInfo> simple_search (string target){
+        GLib.Regex rg_target = null;
+        var results = new Gee.HashSet<GLib.AppInfo> ();
+
+        try {
+            rg_target = new GLib.Regex ("(?i)" + target);
+        } catch (RegexError err) {
+            critical ("Failed to compile target regex: %s", err.message);
+            return results;
+        }
+
+        foreach (var app in apps) {
+            var key = app.key;
+            var d_name = app.value.get_display_name ();
+
+            if (rg_target.match (key) || rg_target.match (d_name)) {
+                results.add (app.value);
+            }
+        }
+
+        return results;
     }
 }
