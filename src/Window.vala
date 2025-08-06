@@ -6,6 +6,8 @@
 public class AppWindow : Gtk.Window {
     
     private Gtk.EntryBuffer buf = new Gtk.EntryBuffer ();
+    private Gtk.Paned paned;
+    private Gtk.ListView results_list;
 
     int interval = 1;
     uint debounce_timer_id = 0;
@@ -17,7 +19,13 @@ public class AppWindow : Gtk.Window {
             placeholder_text = "Search for something…",
         };
 
-        child = entry;
+        paned = new Gtk.Paned (VERTICAL) {
+            start_child = entry,
+        };
+
+        child = paned;
+        resizable = false;
+        vexpand = true;
         default_width = 800;
         titlebar = new Gtk.Grid ();
 
@@ -33,7 +41,15 @@ public class AppWindow : Gtk.Window {
 
         debounce_timer_id = Timeout.add_seconds (interval, () => {
             debounce_timer_id = 0;
-            debug ("Searching for: %s", buf.get_text ());
+            var target = buf.get_text ();
+            debug ("Searching for: %s", target);
+        
+            if (target.length > 0) {
+                paned.set_end_child (new Gtk.Label ("Results for " + target + " will show up here…"));
+            } else {
+                paned.set_end_child (null);
+            }
+            
             return GLib.Source.REMOVE;
         });
     }
