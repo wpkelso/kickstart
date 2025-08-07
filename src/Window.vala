@@ -3,6 +3,27 @@
  * SPDX-FileCopyrightText: 2025 William Kelso <wpkelso@posteo.net>
  */
 
+public class AppBox : Granite.Box {
+    public AppInfo info { get; construct; default = null; }
+    public Icon icon { get; construct; default = null; }
+    public string display_name { get; construct; default = null; }
+
+    public AppBox (AppInfo info, Icon icon, string display_name) {
+        Object (
+            orientation: Gtk.Orientation.HORIZONTAL,
+            child_spacing: Granite.Box.Spacing.SINGLE,
+            info: info,
+            icon: icon,
+            display_name: display_name
+        );
+    }
+
+    construct {
+        append (new Gtk.Image.from_gicon (icon));
+        append (new Gtk.Label (display_name));
+    }
+}
+
 public class AppWindow : Gtk.Window {
     
     private Gtk.EntryBuffer buf = new Gtk.EntryBuffer ();
@@ -15,6 +36,8 @@ public class AppWindow : Gtk.Window {
 
     int interval = 1;
     uint debounce_timer_id = 0;
+
+    private Gee.HashMap<string, AppInfo> current_results;
 
     construct {
 
@@ -37,8 +60,10 @@ public class AppWindow : Gtk.Window {
         default_width = 800;
         titlebar = new Gtk.Grid ();
 
+        current_results = new Gee.HashMap<string, AppInfo> ();
+
         results_list = new Gtk.ListBox () {
-            show_separators = true,
+            activate_on_single_click = true,
             selection_mode = Gtk.SelectionMode.BROWSE,
         };
 
@@ -50,6 +75,7 @@ public class AppWindow : Gtk.Window {
         };
 
         entry.changed.connect (on_entry_modified);
+        results_list.row_activated.connect (on_row_activated);
     }
 
     private void on_entry_modified () {
@@ -69,30 +95,36 @@ public class AppWindow : Gtk.Window {
         });
     }
 
-    private void queue_searches (string target) {
-            
-            var results_box = new Gtk.Box (VERTICAL, 0) {
-                vexpand = true,
-            };
+    private void on_row_activated () {
+        var selected = results_list.get_selected_row ();
+        var child = selected.get_child () as AppBox;
+        var name = child.info.get_id ();
+        debug ("Row was activated: %s", name);
 
-            var app_results = app_backend.simple_search (target);
+        try {
+            child.info.launch (null, null);
+            close ();
+        } catch (Error err) {
+            warning ("Couldn't launch application: %s", err.message);
+        }
+        
+    }
+
+    private void queue_searches (string target) {
+
+            current_results = app_backend.simple_search (target);
 
             if (target.length > 0) {
-                foreach (var result in app_results) {
-                    if (!result.should_show ()) { continue; }
+                foreach (var result in current_results) {
+                    if (!result.value.should_show ()) { continue; }
 
-                    var new_list_row = new Gtk.ListBoxRow (); 
-                    var row_box = new Granite.Box (HORIZONTAL);
+                    var icon = result.value.get_icon ();
+                    var display_name = result.value.get_display_name ();
+                    var row_box = new AppBox (result.value, icon, display_name);
 
-                    var icon = result.get_icon ();
-                    row_box.append (new Gtk.Image.from_gicon (icon));
-                    var display_name = result.get_display_name ();
-                    row_box.append (new Gtk.Label (display_name));
-
-                    new_list_row.set_child (row_box);
-                    results_box.append (new_list_row);
+                    results_list.append (row_box);
                 }
-                results_view.set_child  (results_box);
+                results_view.set_child  (results_list);
                 main_view.append (results_view);
             } else {
                 main_view.remove (results_view);

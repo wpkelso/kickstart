@@ -42,9 +42,9 @@ public class Backend.AppInfo : Object {
         }
     }
 
-    public Gee.HashSet<GLib.AppInfo> simple_search (string target){
+    public Gee.HashMap<string, GLib.AppInfo> simple_search (string target){
         GLib.Regex rg_target = null;
-        var results = new Gee.HashSet<GLib.AppInfo> ();
+        var results = new Gee.HashMap<string, GLib.AppInfo> ();
 
         try {
             rg_target = new GLib.Regex ("(?i)" + target);
@@ -58,7 +58,7 @@ public class Backend.AppInfo : Object {
             var d_name = app.value.get_display_name ();
 
             if (rg_target.match (key) || rg_target.match (d_name)) {
-                results.add (app.value);
+                results.set (app.key, app.value);
             }
         }
 
