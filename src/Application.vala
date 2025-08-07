@@ -4,7 +4,7 @@
  */
 
 
-const string APP_ID = "io.github.wpkelso.kickstart";
+const string APP_ID = "io.github.wpkelso.jumpstart";
 
 public class Application : Gtk.Application {
 

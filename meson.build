@@ -1,5 +1,5 @@
 project(
-    'io.github.wpkelso.kickstart',
+    'io.github.wpkelso.jumpstart',
     ['vala', 'c'],
     version: '0.0.1',
     license: 'GPL-3.0'
