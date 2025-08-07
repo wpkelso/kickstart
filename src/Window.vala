@@ -113,6 +113,7 @@ public class AppWindow : Gtk.Window {
     private void queue_searches (string target) {
 
             current_results = app_backend.simple_search (target);
+            results_list.remove_all ();
 
             if (target.length > 0) {
                 foreach (var result in current_results) {
