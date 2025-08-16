@@ -71,7 +71,8 @@ public class AppWindow : Gtk.Window {
             margin_start = 6,
             margin_end = 6,
             margin_bottom = 6,
-            min_content_height = 128,
+            propagate_natural_height = true,
+            max_content_height = 128,
         };
 
         entry.changed.connect (on_entry_modified);
